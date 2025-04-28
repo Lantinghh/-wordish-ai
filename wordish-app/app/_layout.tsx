@@ -18,7 +18,9 @@ export default function Layout() {
   return <Stack
   screenOptions={{
     headerShown: false,
-    animation: 'none', // 🚫 禁用页面间切换动画
+    // animation: 'none', // 🚫 禁用页面间切换动画
+    animation: 'slide_from_left', // ✅ 这里改成右滑动
+    gestureEnabled: true,          // ✅ 支持手势左滑返回
   }}
 />;
 }

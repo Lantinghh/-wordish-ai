@@ -53,8 +53,15 @@ export default function WordClubPanel({ visible }: { visible: boolean }) {
       { text: 'Iambic', status: 'Stranger' },
     ],
     'GRE Essential': [
-      { text: 'Obfuscate', status: 'Stranger' },
-      { text: 'Prosaic', status: 'Stranger' },
+      { text: 'Assuage', status: 'Stranger' },
+      { text: 'Capricious', status: 'Stranger' },
+      { text: 'Convoluted', status: 'Stranger' },
+      { text: 'Dissipated', status: 'Stranger' },
+      { text: 'Grandiloquent', status: 'Stranger' },
+      { text: 'Imperturbable', status: 'Stranger' },
+      { text: 'Inimical', status: 'Stranger' },
+      { text: 'Obdurate', status: 'Stranger' },
+      { text: 'Pedantic', status: 'Stranger' },
     ],
     'TOFEL Essential': [
       { text: 'Comprehension', status: 'Stranger' },
@@ -66,7 +73,7 @@ export default function WordClubPanel({ visible }: { visible: boolean }) {
   const [wordList, setWordList] = useState<{ text: string; status: string }[]>([]);
 
   const toggleStatus = (index: number) => {
-    const statuses = ['Stranger', 'Seen', 'Familiar', 'Mastered'];
+    const statuses = ['Stranger', 'First Date', "We've met", 'A Match'];
     setWordList((prev) => {
       const updated = [...prev];
       const currentStatus = updated[index].status;
@@ -81,8 +88,31 @@ export default function WordClubPanel({ visible }: { visible: boolean }) {
   };
 
   const handleSelectCourse = (course: keyof typeof courseWords) => {
-    setWordList(courseWords[course]);
-    setShowWordList(false);
+    const selectedWords = courseWords[course].map(word => ({ ...word })); 
+    setWordList(selectedWords); // 注意这里浅拷贝，避免直接改到 courseWords 本体！
+    
+    setCourseStatus((prev) => ({
+      ...prev,
+      [course]: 'On going', // 把对应课程状态改成 Ongoing
+    }));
+  
+    setShowWordList(false); // 隐藏课程列表
+  };
+  
+
+  const [courseStatus, setCourseStatus] = useState<{ [key: string]: string }>(
+    Object.keys(courseWords).reduce((acc, course) => {
+      acc[course] = 'Start!'; // 初始化所有课程状态为 'Start'
+      return acc;
+    }, {} as { [key: string]: string })
+  );
+  const getCourseButtonStyle = (status: string) => {
+    if (status === 'Start!') {
+      return { button: { borderColor: '#D34646' }, text: { color: '#D34646' } };
+    } else if (status === 'On going') {
+      return { button: { borderColor: '#FE7C22', }, text: { color: '#FE7C22' } };
+    }
+    return { button: { borderColor: '#D34646', }, text: { color: '#D34646' } };
   };
 
   return (
@@ -91,47 +121,72 @@ export default function WordClubPanel({ visible }: { visible: boolean }) {
 
       {!showWordList ? (
         <>
+          {/* 这是显示单词状态页面 */}
           <Text style={styles.wordCount}>Word Count: {wordList.length}</Text>
           <Pressable style={styles.addButton} onPress={handleAddWord}>
             <Image source={require('../../assets/wordpanel/add_button.png')} style={styles.addButtonImage} />
           </Pressable>
 
           {wordList.length > 0 && (
-            console.log(`Word List: ${JSON.stringify(wordList)}`),
             <ScrollView style={styles.listWrapper} contentContainerStyle={{ paddingBottom: 40 }}>
-              {wordList.map((word, idx) => (
-                <View key={idx} style={styles.wordRow}>
-                  <Text style={styles.wordText}>{word.text}</Text>
-                  <Pressable style={styles.statusButton} onPress={() => toggleStatus(idx)}>
-                    <Text style={styles.statusText}>{word.status}</Text>
-                  </Pressable>
-                </View>
-              ))}
+              {wordList.map((word, idx) => {
+                const getStatusStyle = (status: string) => {
+                  switch (status) {
+                    case 'Stranger': return { backgroundColor: '#F3F5A9', color: '#FE5A1C' };
+                    case 'First Date': return { backgroundColor: '#FFE134', color: '#FE5A1C' };
+                    case "We've met": return { backgroundColor: '#FFBF2E', color: '#FE5A1C' };
+                    case 'A Match': return { backgroundColor: '#FE7C22', color: '#FFFFFF' };
+                    default: return { backgroundColor: '#F3F5A9', color: '#FE5A1C' };
+                  }
+                };
+                const statusStyle = getStatusStyle(word.status);
+
+                return (
+                  <View key={idx} style={styles.wordRow}>
+                    <Text style={styles.wordText}>{word.text}</Text>
+                    <Pressable
+                      style={[styles.statusButton, { backgroundColor: statusStyle.backgroundColor }]}
+                      onPress={() => toggleStatus(idx)}
+                    >
+                      <Text style={[styles.statusText, { color: statusStyle.color }]}>{word.status}</Text>
+                    </Pressable>
+                  </View>
+                );
+              })}
             </ScrollView>
           )}
         </>
       ) : (
+        <>
+          {/* 这是显示课程选择页面 */}
+          <View style={styles.wordListContainer}>
+            <Pressable style={styles.backButton} onPress={() => setShowWordList(false)}>
+              <Image source={require('../../assets/wordpanel/back_button.png')} style={styles.backButtonImage} />
+            </Pressable>
 
-        <View style={styles.wordListContainer}>
-        <Pressable style={styles.backButton} onPress={() => setShowWordList(false)}>
-          <Image source={require('../../assets/wordpanel/back_button.png')} style={styles.backButtonImage} />
-        </Pressable>
-
-          <ScrollView style={styles.listWrapper} contentContainerStyle={{ paddingBottom: 40 }}>
-            {Object.keys(courseWords).map((title, idx) => (
-              <View key={idx} style={styles.wordRow}>
-                <Text style={styles.wordText}>{title}</Text>
-                <Pressable style={styles.startButton} onPress={() => handleSelectCourse(title as keyof typeof courseWords)}>
-                  <Text style={styles.startText}>Start!</Text>
-                </Pressable>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
+            <ScrollView style={styles.listWrapper} contentContainerStyle={{ paddingBottom: 40 }}>
+              {Object.keys(courseWords).map((title, idx) => {
+                const courseStyles = getCourseButtonStyle(courseStatus[title]);
+                return (
+                  <View key={idx} style={styles.wordRow}>
+                    <Text style={styles.wordText}>{title}</Text>
+                    <Pressable
+                      style={[styles.startButton, courseStyles.button]}
+                      onPress={() => handleSelectCourse(title as keyof typeof courseWords)}
+                    >
+                      <Text style={[styles.startText, courseStyles.text]}>{courseStatus[title]}</Text>
+                    </Pressable>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </>
       )}
     </Animated.View>
   );
 }
+
 
 
 import { Dimensions } from 'react-native';
@@ -244,11 +299,13 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   startButton: {
+    width: 120, // 固定宽度
+    height: 40, // 固定高度
     borderWidth: 1,
     borderColor: '#D34646',
-    paddingVertical: 2.1,
-    paddingHorizontal: 35,
     borderRadius: 4,
+    justifyContent: 'center', // 垂直居中内容
+    alignItems: 'center', // 水平居中内容
   },
   startText: {
     fontSize: 16,
