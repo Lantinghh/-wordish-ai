@@ -21,7 +21,7 @@ export default function Step5_SwipeToContinue() {
   const panResponder = PanResponder.create({
     onMoveShouldSetPanResponder: (_, gesture) => gesture.dy < -20,
     onPanResponderRelease: (_, gesture) => {
-      if (gesture.dy < -50) router.replace('/');
+      if (gesture.dy < -50) router.replace('../chat');
     },
   });
 
