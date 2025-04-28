@@ -3,12 +3,12 @@ import { View, StyleSheet, Image, Pressable, Text, ScrollView } from 'react-nati
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 import { useEffect, useState } from 'react';
 import { useFonts } from 'expo-font';
+import { useRouter } from 'expo-router';
 
 
 export default function WordClubPanel({ visible }: { visible: boolean }) {
-  const [fontsLoaded] = useFonts({
-    'Figma Hand': require('../../assets/fonts/Caveat_Handlee/Handlee/Handlee-Regular.ttf'), // 确保路径和文件名正确
-  });
+
+  const router = useRouter();
 
   
   const rotate = useSharedValue('-15deg'); // 初始为 -15°
@@ -54,8 +54,8 @@ export default function WordClubPanel({ visible }: { visible: boolean }) {
     ],
     'GRE Essential': [
       { text: 'Assuage', status: 'Stranger' },
-      { text: 'Capricious', status: 'Stranger' },
-      { text: 'Convoluted', status: 'Stranger' },
+      { text: 'Capricious', status: 'First Date' },
+      { text: 'Convoluted', status: "We've met" },
       { text: 'Dissipated', status: 'Stranger' },
       { text: 'Grandiloquent', status: 'Stranger' },
       { text: 'Imperturbable', status: 'Stranger' },
@@ -146,7 +146,7 @@ export default function WordClubPanel({ visible }: { visible: boolean }) {
                     <Text style={styles.wordText}>{word.text}</Text>
                     <Pressable
                       style={[styles.statusButton, { backgroundColor: statusStyle.backgroundColor }]}
-                      onPress={() => toggleStatus(idx)}
+                      onPress={() => router.push(`/wordDetail?word=${encodeURIComponent(word.text)}`)}
                     >
                       <Text style={[styles.statusText, { color: statusStyle.color }]}>{word.status}</Text>
                     </Pressable>
