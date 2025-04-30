@@ -121,15 +121,3 @@ Contributions are welcome! To contribute:
 
 This project is licensed under the MIT License.
 
-## Contact
-
-Have questions or suggestions? Reach out to us:
-
-- 📧 Email: [support@wordish-ai.com](mailto:support@wordish-ai.com)
-- 💬 GitHub Issues: [Submit an issue](https://github.com/your-username/wordish-ai/issues)
-```
-
----
-
-你可以将其中的 GitHub 链接、图片路径和邮箱替换成你的真实信息。  
-需要我再帮你配一份中文版本、加 logo、或做成带徽章的 GitHub 美化版也可以告诉我！
