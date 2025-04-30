@@ -9,15 +9,6 @@ import { useRouter } from 'expo-router';
 export default function WordClubPanel({ visible }: { visible: boolean }) {
   const router = useRouter();
 
-  const [fontsLoaded] = useFonts({
-    'Handlee-Regular': require('../../assets/fonts/Handlee-Regular.ttf'), // 确保路径正确
-  });
-
-  if (!fontsLoaded) {
-    return null; // 在字体加载完成之前不渲染组件
-  }
-
-  
   const rotate = useSharedValue('-15deg'); // 初始为 -15°
   const offsetX = useSharedValue(400); // 初始在右边隐藏
   const translateY = useSharedValue(0); // 初始位置

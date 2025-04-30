@@ -7,6 +7,8 @@ import { useEffect } from 'react';
 export default function Layout() {
   const [fontsLoaded] = useFonts({
     'KleeOne-Regular': require('../assets/fonts/Klee_One/KleeOne-Regular.ttf'),
+    'Handlee-Regular': require('../assets/fonts/Handlee-Regular.ttf'), // 确保路径正确
+
   });
 
   useEffect(() => {
