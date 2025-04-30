@@ -1,5 +1,5 @@
 // app/chat/index.tsx
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import WordClubPanel from '../components/WordClubPanel';
@@ -19,76 +19,187 @@ export default function ChatMainPage() {
   const [inputText, setInputText] = useState('');
   const [isWordClubVisible, setWordClubVisible] = useState(false);
   const flatListRef = useRef<FlatList>(null);
-
-  // const handleSend = async () => {
-  //   if (!inputText.trim()) return;
-  //   const now = Date.now();
-  //   const userMessage = {
-  //     id: now.toString(),
-  //     text: inputText,
-  //     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-  //     sender: 'me',
-  //   };
-
-  //   setMessages((prev) => [...prev, userMessage]);
-  //   setInputText('');
+  // useEffect(() => {
+  //   const ws = new WebSocket('wss://croissant-ai-ms-hackthon.vercel.app/api/chat');
   
-  //   const loadingMessage = {
-  //     id: (now + 1).toString(),
-  //     text: '',
-  //     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-  //     sender: 'loading',
+  //   ws.onopen = () => {
+  //     console.log('✅ WebSocket connected');
+  //     // 可以发送身份认证信息，例如：ws.send(JSON.stringify({ type: 'auth', token: '...' }))
   //   };
   
-  //   setMessages((prev) => [...prev, loadingMessage]);
-  //   const startTime = Date.now();
+  //   ws.onmessage = (event) => {
+  //     const data = JSON.parse(event.data);
+  //     console.log('📨 New message:', data);
   
-  //   try {
-  //     const response = await fetch('https://croissant-ai-ms-hackthon.vercel.app/api/chat', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         'Accept': 'text/plain',
-  //       },
-  //       body: JSON.stringify({
-  //         messages: [
-  //           {
-  //             role: 'user',
-  //             content: userMessage.text,
-  //           }
-  //         ]
-  //       }),
-  //     });
-  
-  //     const aiReply = await response.text();
-  //     const elapsed = Date.now() - startTime;
-  //     const minimumLoadingTime = 2000; // ⭐ 这里调整，比如 800ms，1000ms，看你想要多久
-  //     const delay = Math.max(minimumLoadingTime - elapsed, 0);
-  
-  //     setTimeout(() => {
-  //       const aiMessage = {
-  //         id: loadingMessage.id,
-  //         text: aiReply,
+  //     // 把 data 转成新的消息并更新 UI
+  //     setMessages((prev) => [
+  //       ...prev,
+  //       {
+  //         id: Date.now().toString(),
+  //         text: data.txt_msg,
   //         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   //         sender: 'croissant',
-  //       };
+  //         highlights: data.tofelWords || [],
+  //       },
+  //     ]);
+  //   };
   
-  //       setMessages((prev) =>
-  //         prev.map((msg) => (msg.id === loadingMessage.id ? aiMessage : msg))
-  //       );
+  //   ws.onerror = (err) => {
+  //     console.error('❌ WebSocket error:', err);
+  //   };
   
-  //       setTimeout(() => {
-  //         flatListRef.current?.scrollToEnd({ animated: true });
-  //       }, 100);
+  //   ws.onclose = () => {
+  //     console.warn('⚠️ WebSocket closed');
+  //   };
   
-  //     }, delay);
+  //   return () => {
+  //     ws.close();
+  //   };
+  // }, []);
 
-  //   } catch (error) {
-  //     console.error('发送到AI失败:', error);
-  //   }
-  // };
+
+
+  useEffect(() => {
+    const startConversation = async () => {
+      try {
+        const response = await fetch('https://croissant-ai-ms-hackthon.vercel.app/api/chat', {
+          method: 'POST',
+          headers: {
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            user_id: '550e8400-e29b-41d4-a716-446655440000',
+            messages: [
+              {
+                role: 'assistant',
+                content: 'START_CONVERSATION',
+                conversation_id: 'abcscao',
+              },
+            ],
+          }),
+        });
+  
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+
+        const aiReply = await response.json();
+        console.log('✅ API Response:', aiReply);
+  
+
+        if (Array.isArray(aiReply)) {
+          // 遍历返回的三条消息，先为每条消息添加一个 loading 消息
+          const loadingMessages = aiReply.map((item, index) => ({
+            id: `${item.conversation_id}-${index}-loading`, // 唯一 ID，标记为 loading
+            text: 'Loading...', // 显示加载中的文本
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            sender: 'loading',
+          }));
+        
+          // 添加所有 loading 消息到状态中
+          setMessages((prev) => [...prev, ...loadingMessages]);
+        
+          // 格式化实际的消息
+          const formattedMessages = aiReply.map((item, index) => ({
+            id: `${item.conversation_id}-${index}`, // 确保唯一 ID
+            text: item.txt_msg || '',
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            sender: 'croissant',
+            highlights: item.tofelWords?.map((word: { word: any; explanation: any }) => ({
+              word: word.word,
+              meaning: word.explanation,
+            })) || [],
+          }));
+        
+          // 替换 loading 消息为实际的消息
+          setTimeout(() => {
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.sender === 'loading'
+                  ? formattedMessages.find((fm) => fm.id === msg.id.replace('-loading', '')) || msg
+                  : msg
+              )
+            );
+          }, 1000); // 模拟加载延迟
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error('❌ Failed to start conversation:', error.message);
+        } else {
+          console.error('❌ Failed to start conversation:', error);
+        }
+      }
+    };
+  
+    startConversation();
+  }, []);
+ 
+  useEffect(() => {
+    // 滚动到最新消息
+    flatListRef.current?.scrollToEnd({ animated: true });
+  }, [messages]);
+  
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch('https://croissant-ai-ms-hackthon.vercel.app/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            user_id: '550e8400-e29b-41d4-a716-446655440000', // 替换为实际的用户 ID
+            messages: [
+              {
+                role: 'user',
+                content: '',
+                conversation_id: 'your-conversation-id', // 替换为实际的会话 ID
+              },
+            ],
+          }),
+        });  
+        const now = Date.now();
+
+        const loadingMessage = {
+          id: (now + 1).toString(),
+          text: '',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          sender: 'loading',
+        };
+      
+        setMessages((prev) => [...prev, loadingMessage]);
+
+        const aiReply = await res.json();
+  
+        if (aiReply.txt_msg) {
+          const aiMessage = {
+            id: loadingMessage.id,
+            text: aiReply.txt_msg || '',
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            sender: 'croissant',
+            highlights: aiReply.tofelWords?.map((word: { word: any; explanation: any; }) => ({
+              word: word.word,
+              meaning: word.explanation,
+            })) || [],
+          };
+      
+          setMessages((prev) =>
+            prev.map((msg) => (msg.id === loadingMessage.id ? aiMessage : msg))
+          );
+        }
+      } catch (err) {
+        console.error('Polling failed:', err);
+      }
+    }, 50000); // poll every 5 seconds
+  
+    return () => clearInterval(interval);
+  }, []);
+  
   const handleSend = async () => {
     if (!inputText.trim()) return;
+  
     const now = Date.now();
     const userMessage = {
       id: now.toString(),
@@ -108,58 +219,45 @@ export default function ChatMainPage() {
     };
   
     setMessages((prev) => [...prev, loadingMessage]);
-    const startTime = Date.now();
   
     try {
       const response = await fetch('https://croissant-ai-ms-hackthon.vercel.app/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
         },
         body: JSON.stringify({
+          user_id: '550e8400-e29b-41d4-a716-446655440000', // 替换为实际的用户 ID
           messages: [
             {
               role: 'user',
               content: userMessage.text,
-            }
-          ]
+              conversation_id: 'your-conversation-id', // 替换为实际的会话 ID
+            },
+          ],
         }),
       });
   
-      const aiReply = await response.json(); // 解析 JSON 数据
-      console.log('AI 回复:', aiReply);
-      const elapsed = Date.now() - startTime;
-      const minimumLoadingTime = 2000;
-      const delay = Math.max(minimumLoadingTime - elapsed, 0);
+      const aiReply = await response.json();
   
-      setTimeout(() => {
-        const aiMessage = {
-          id: loadingMessage.id,
-          text: aiReply.txt_msg, // 提取文本消息
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          sender: 'croissant',
-          highlights: aiReply.tofelWords?.map((word: { word: any; explanation: any; }) => ({
-            word: word.word,
-            meaning: word.explanation,
-          })) || [], // 提取高亮单词
-                  };
-        console.log('AI 消息:', aiMessage);
-        setMessages((prev) =>
-          prev.map((msg) => (msg.id === loadingMessage.id ? aiMessage : msg))
-        );
+      const aiMessage = {
+        id: loadingMessage.id,
+        text: aiReply.txt_msg || '',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        sender: 'croissant',
+        highlights: aiReply.tofelWords?.map((word: { word: any; explanation: any; }) => ({
+          word: word.word,
+          meaning: word.explanation,
+        })) || [],
+      };
   
-        setTimeout(() => {
-          flatListRef.current?.scrollToEnd({ animated: true });
-        }, 100);
-  
-      }, delay);
-  
+      setMessages((prev) =>
+        prev.map((msg) => (msg.id === loadingMessage.id ? aiMessage : msg))
+      );
     } catch (error) {
-      console.error('发送到AI失败:', error);
+      console.error('Error sending message:', error);
     }
   };
-
   const router = useRouter(); // 👈 创建router实例
 
   return (

@@ -49,7 +49,12 @@ export default function WordClubPanel({ visible }: { visible: boolean }) {
   { text: 'Significant', status: 'Stranger' },
   { text: 'Viable', status: 'Stranger' },
 ],
-
+'GRE Essential ': [
+  { text: 'assuage', status: 'A Match' },
+],
+  };
+  const handleAddWord = () => {
+    setShowWordList(true);
   };
 
   const [showWordList, setShowWordList] = useState(false);
@@ -65,7 +70,16 @@ export default function WordClubPanel({ visible }: { visible: boolean }) {
   // });
   // const handleAddWord = async () => {
   //   try {
-  //     const res = await fetch(`${API_BASE_URL}/vocabulary`);
+  //     const res = await fetch(
+  //       'https://croissant-ai-ms-hackthon.vercel.app/api/vocabulary?user_id=550e8400-e29b-41d4-a716-446655440000',
+  //       {
+  //         method: 'GET',
+  //         headers: {
+  //           'accept': 'application/json', // 确保请求头与 curl 一致
+  //         },
+  //       }
+  //     );
+
   //     const data = await res.json();
   //     console.log('📥 后端返回词表:', data);
   
@@ -84,7 +98,7 @@ export default function WordClubPanel({ visible }: { visible: boolean }) {
   //         status,
   //         id: item.id,
   //       });
-  //     });
+  //     }); 
   
   //     // 替换本地课程数据
   //     setCourseWords(grouped);
@@ -101,9 +115,7 @@ export default function WordClubPanel({ visible }: { visible: boolean }) {
   // };
   
 
-  const handleAddWord = () => {
-    setShowWordList(true);
-  };
+  
 
   const handleSelectCourse = (course: keyof typeof courseWords) => {
     const selectedWords = courseWords[course].map(word => ({ ...word })); 
