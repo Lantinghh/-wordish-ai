@@ -7,8 +7,15 @@ import { useRouter } from 'expo-router';
 
 
 export default function WordClubPanel({ visible }: { visible: boolean }) {
-
   const router = useRouter();
+
+  const [fontsLoaded] = useFonts({
+    'Handlee-Regular': require('../../assets/fonts/Handlee-Regular.ttf'), // 确保路径正确
+  });
+
+  if (!fontsLoaded) {
+    return null; // 在字体加载完成之前不渲染组件
+  }
 
   
   const rotate = useSharedValue('-15deg'); // 初始为 -15°
@@ -39,49 +46,69 @@ export default function WordClubPanel({ visible }: { visible: boolean }) {
     ],
   }));
   const courseWords = {
-    'SAT Essential': [
-      { text: 'Convoluted', status: 'Stranger' },
-      { text: 'Spurious', status: 'Stranger' },
-      { text: 'Spuriouss', status: 'Stranger' },
-    ],
-    'ACT Essential': [
-      { text: 'Verbose', status: 'Stranger' },
-      { text: 'Precocious', status: 'Stranger' },
-    ],
-    'AP Literature': [
-      { text: 'Sonnet', status: 'Stranger' },
-      { text: 'Iambic', status: 'Stranger' },
-    ],
-    'GRE Essential': [
-      { text: 'Assuage', status: 'Stranger' },
-      { text: 'Capricious', status: 'First Date' },
-      { text: 'Convoluted', status: "We've met" },
-      { text: 'Dissipated', status: 'Stranger' },
-      { text: 'Grandiloquent', status: 'Stranger' },
-      { text: 'Imperturbable', status: 'Stranger' },
-      { text: 'Inimical', status: 'Stranger' },
-      { text: 'Obdurate', status: 'Stranger' },
-      { text: 'Pedantic', status: 'Stranger' },
-    ],
-    'TOFEL Essential': [
-      { text: 'Comprehension', status: 'Stranger' },
-      { text: 'Articulate', status: 'Stranger' },
-    ],
+   'TOFEL Essential': [
+  { text: 'Accumulate', status: 'A Match' },
+  { text: 'Assess', status: "We've met" },
+  { text: 'Consequently', status: 'A Match' },
+  { text: 'Contribute', status: 'First Date' },
+  { text: 'Expose', status: 'Stranger' },
+  { text: 'Mature', status: 'Stranger' },
+  { text: 'Precise', status: 'Stranger' },
+  { text: 'Reinforce', status: 'Stranger' },
+  { text: 'Significant', status: 'Stranger' },
+  { text: 'Viable', status: 'Stranger' },
+],
+
   };
 
   const [showWordList, setShowWordList] = useState(false);
   const [wordList, setWordList] = useState<{ text: string; status: string }[]>([]);
-
-  const toggleStatus = (index: number) => {
-    const statuses = ['Stranger', 'First Date', "We've met", 'A Match'];
-    setWordList((prev) => {
-      const updated = [...prev];
-      const currentStatus = updated[index].status;
-      const nextIndex = (statuses.indexOf(currentStatus) + 1) % statuses.length;
-      updated[index].status = statuses[nextIndex];
-      return updated;
-    });
-  };
+  // const [courseWords, setCourseWords ] = useState<{
+  //   [key: string]: { text: string; status: string; id: string }[];
+  // }>({
+  //   'SAT Essential': [],
+  //   'ACT Essential': [],
+  //   'AP Literature': [],
+  //   'GRE Essential': [],
+  //   'TOFEL Essential': [],
+  // });
+  // const handleAddWord = async () => {
+  //   try {
+  //     const res = await fetch(`${API_BASE_URL}/vocabulary`);
+  //     const data = await res.json();
+  //     console.log('📥 后端返回词表:', data);
+  
+  //     const grouped: { [category: string]: { text: string; status: string; id: string }[] } = {};
+  
+  //     data.forEach((item: any) => {
+  //       const category = item.category || 'Uncategorized';
+  //       const status = item.states?.[0]?.status || 'Stranger';
+  
+  //       if (!grouped[category]) {
+  //         grouped[category] = [];
+  //       }
+  
+  //       grouped[category].push({
+  //         text: item.word,
+  //         status,
+  //         id: item.id,
+  //       });
+  //     });
+  
+  //     // 替换本地课程数据
+  //     setCourseWords(grouped);
+  
+  //     // 初始化课程状态为 "Start!"
+  //     const initStatus: { [key: string]: string } = {};
+  //     Object.keys(grouped).forEach((c) => (initStatus[c] = 'Start!'));
+  //     setCourseStatus(initStatus);
+  
+  //     setShowWordList(true);
+  //   } catch (error) {
+  //     console.error('❌ 获取词汇失败:', error);
+  //   }
+  // };
+  
 
   const handleAddWord = () => {
     setShowWordList(true);
@@ -115,9 +142,140 @@ export default function WordClubPanel({ visible }: { visible: boolean }) {
     return { button: { borderColor: '#D34646', }, text: { color: '#D34646' } };
   };
 
+  const [selectedWord, setSelectedWord] = useState<{ text: string; status: string } | null>(null);
+  const memeMap: { [word: string]: { [stage: string]: any } } = {
+    Accumulate: {
+      "We've met": require('../../assets/memes/TOFEL/Accumulate.jpg'),
+      "A Match": require('../../assets/memes/TOFEL/Accumulate2.jpg'),
+    },
+    Assess: {
+      "We've met": require('../../assets/memes/TOFEL/Assess.jpg'),
+      "A Match": require('../../assets/memes/TOFEL/Assess2.jpg'),
+    },
+    Consequently: {
+      "We've met": require('../../assets/memes/TOFEL/Consequently.jpg'),
+      "A Match": require('../../assets/memes/TOFEL/Consequently 2.jpg'),
+    },
+    Contribute: {
+      "We've met": require('../../assets/memes/TOFEL/Contribute.jpg'),
+      "A Match": require('../../assets/memes/TOFEL/Contribute2.jpg'),
+    },
+    Expose: {
+      "We've met": require('../../assets/memes/TOFEL/Expose.jpg'),
+      "A Match": require('../../assets/memes/TOFEL/Expose2.jpg'),
+    },
+    Mature: {
+      "We've met": require('../../assets/memes/TOFEL/Mature.jpeg'),
+      "A Match": require('../../assets/memes/TOFEL/Mature 2.jpg'),
+    },
+    Precise: {
+      "We've met": require('../../assets/memes/TOFEL/Precise.jpg'),
+      "A Match": require('../../assets/memes/TOFEL/Precise2.png'),
+    },
+    Reinforce: {
+      "We've met": require('../../assets/memes/TOFEL/Reinforce.jpg'),
+      "A Match": require('../../assets/memes/TOFEL/Reinforce 2.jpg'),
+    },
+    Significant: {
+      "We've met": require('../../assets/memes/TOFEL/Significant.jpg'),
+      "A Match": require('../../assets/memes/TOFEL/Significant 2.jpg'),
+    },
+    Viable: {
+      "A Match": require('../../assets/memes/TOFEL/Viable 2.jpg'), // 注意你只有 A Match 图
+    },
+  };
+  
+  const STAGES = ['Stranger', 'First Date', "We've met", 'A Match'] as const;
+
+  const renderStageContent = (stage: string, selectedWord: { text: string; status: string }) => {
+    const getStatusStyle = (status: string) => {
+      switch (status) {
+        case 'Stranger': return { backgroundColor: '#F3F5A9', color: '#FE5A1C' };
+        case 'First Date': return { backgroundColor: '#FFE134', color: '#FE5A1C' };
+        case "We've met": return { backgroundColor: '#FFBF2E', color: '#FE5A1C' };
+        case 'A Match': return { backgroundColor: '#FE7C22', color: '#FFFFFF' };
+        default: return { backgroundColor: '#F3F5A9', color: '#FE5A1C' };
+      }
+    };
+  
+    const statusStyle = getStatusStyle(stage);
+  
+    switch (stage) {
+      case 'Stranger':
+        return (
+          <>
+            <Text style={[styles.statusButton1, { backgroundColor: statusStyle.backgroundColor, color: statusStyle.color }]}>
+              Stranger
+            </Text>
+            <Text style={styles.detailContent}>
+              You haven't interacted with <Text style={{ color: '#0275d8', fontWeight: 'bold' }}>{selectedWord.text}</Text> yet.
+            </Text>
+          </>
+        );
+  
+      case 'First Date':
+        return (
+          <>
+            <Text style={[styles.statusButton1, { backgroundColor: statusStyle.backgroundColor, color: statusStyle.color }]}>
+              First Date
+            </Text>
+            <Text style={styles.detailContent}>
+              Uh-huh. That’s the most <Text style={{ color: '#0275d8', fontWeight: 'bold' }}>{selectedWord.text}</Text> way I’ve ever seen
+              someone try to run into me “by chance.”
+            </Text>
+          </>
+        );
+  
+      case "We've met":
+      case 'A Match':
+        return (
+          <>
+            <Text style={[styles.statusButton1, { backgroundColor: statusStyle.backgroundColor, color: statusStyle.color }]}>
+              {stage}
+            </Text>
+            {memeMap[selectedWord.text]?.[stage] ? (
+              <Image
+                source={memeMap[selectedWord.text][stage]}
+                style={styles.memeImage}
+              />
+            ) : (
+              <Text style={styles.detailContent}>No meme found for this stage.</Text>
+            )}
+          </>
+        );
+  
+      default:
+        return null;
+    }
+  };
+  
   return (
-    <Animated.View style={[styles.panel, animatedStyle]} pointerEvents="box-none">
-      <Image source={require('../../assets/home_images/notebook/word_club_bg.png')} style={styles.image} />
+        <Animated.View style={[styles.panel, animatedStyle]} pointerEvents="box-none">
+          <Image source={require('../../assets/home_images/notebook/word_club_bg.png')} style={styles.image} />
+        {/* ✅ 插入 detail 卡片（置顶） */}
+        {selectedWord && (
+      <View style={styles.detailCard}>
+        <Image
+        source={require('../../assets/memes/notebook.png')}
+        style={styles.detailCardBg}
+        resizeMode="contain"
+      />
+        <Pressable onPress={() => setSelectedWord(null)} style={styles.closeDetailButton}>
+          <Image
+            source={require('../../assets/wordpanel/back_button.png')}  // 根据你的实际路径修改
+            style={{ width: 24, height: 24 }} // 设置图片大小
+            resizeMode="contain" // 确保图片按比例缩放
+         />
+        </Pressable>
+
+        <Text style={styles.detailTitle}>{selectedWord.text}</Text>
+
+        {/* 渲染当前状态及之前的内容 */}
+        {STAGES.slice(1, STAGES.indexOf(selectedWord.status as typeof STAGES[number]) + 1).map(stage => (
+        <View key={stage}>{renderStageContent(stage, selectedWord)}</View>
+      ))}
+      </View>
+    )}
 
       {!showWordList ? (
         <>
@@ -145,11 +303,12 @@ export default function WordClubPanel({ visible }: { visible: boolean }) {
                   <View key={idx} style={styles.wordRow}>
                     <Text style={styles.wordText}>{word.text}</Text>
                     <Pressable
-                      style={[styles.statusButton, { backgroundColor: statusStyle.backgroundColor }]}
-                      onPress={() => router.push(`/wordDetail?word=${encodeURIComponent(word.text)}`)}
-                    >
-                      <Text style={[styles.statusText, { color: statusStyle.color }]}>{word.status}</Text>
-                    </Pressable>
+                    style={[styles.statusButton, { backgroundColor: statusStyle.backgroundColor }]}
+                    onPress={() => setSelectedWord(word)}
+                  >
+                    <Text style={[styles.statusText, { color: statusStyle.color }]}>{word.status}</Text>
+                  </Pressable>
+
                   </View>
                 );
               })}
@@ -217,7 +376,7 @@ const styles = StyleSheet.create({
     height: 21,
     left: 57,
     top: 193,
-    fontFamily: 'Figma Hand',
+    fontFamily: 'Handlee-Regular',
     fontStyle: 'normal',
     fontWeight: '400',
     fontSize: 14,
@@ -230,7 +389,7 @@ const styles = StyleSheet.create({
     height: 21,
     left: 57,
     top: 220,
-    fontFamily: 'Figma Hand',
+    fontFamily: 'Handlee-Regular',
     fontStyle: 'normal',
     fontWeight: '400',
     fontSize: 14,
@@ -276,31 +435,31 @@ const styles = StyleSheet.create({
   },
   listWrapper: {
     position: 'absolute', // 确保覆盖在面板上
-    top: 210,
+    top: 209 ,
     left: 40,
-    width: '90%',
+    width: '87%',
     height: '100%',
     backgroundColor: 'transparent', // 设置背景色，确保内容可见
     borderTopLeftRadius: 16,
     borderBottomLeftRadius: 16,
     zIndex: 10, // 确保在其他内容之上
-    padding: 20,
+    padding: 15,
   },
   wordRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 11,
+    paddingVertical: 11.5,
   },
   wordText: {
     fontSize: 18,
     color: '#000',
-    fontFamily: 'Figma Hand',
+    fontFamily: 'Handlee-Regular',
     fontStyle: 'italic',
   },
   startButton: {
-    width: 120, // 固定宽度
-    height: 40, // 固定高度
+    width: 140, // 固定宽度
+    height: 25, // 固定高度
     borderWidth: 1,
     borderColor: '#D34646',
     borderRadius: 4,
@@ -310,20 +469,97 @@ const styles = StyleSheet.create({
   startText: {
     fontSize: 16,
     color: '#D34646',
-    fontFamily: 'Figma Hand',
+    fontFamily: 'Handlee-Regular',
     fontStyle: 'italic',
 
   },
   statusButton: {
+    width: 120, // 固定宽度
+    height: 23, // 固定高度
     paddingVertical: 4,
     paddingHorizontal: 12,
     borderRadius: 4,
     backgroundColor: '#FFF8B3',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   statusText: {
     fontSize: 16,
     color: '#FE5A1C',
-    fontFamily: 'Figma Hand',
+    fontFamily: 'Handlee-Regular',
     fontStyle: 'italic',
   },
+  detailCard: {
+    position: 'absolute',
+    width: screenWidth-7, // 宽度增加 40 像素
+    height: screenHeight + 70 , // 高度增加 70 像素
+    top: 105,
+    left: 0,
+    right: 40,
+    padding: 16,
+    backgroundColor: 'transparent',
+    borderRadius: 12,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    zIndex: 20,
+  },
+  detailCardBg: {
+    position: 'absolute',
+    width: screenWidth-7, // 宽度增加 40 像素
+    height: screenHeight, // 高度增加 70 像素
+    top:-70,
+    left: 0,
+    opacity: 1, // 视情况调整透明度
+    zIndex: 0,
+  },  
+  detailTitle: {
+    top:0,
+    left: screenWidth/3,
+    fontSize: 25,
+    fontWeight: 'bold',
+    marginBottom: -5,
+    fontFamily: 'Handlee-Regular',
+  },
+  detailContent: {
+    left: 20,
+    fontSize: 16,
+    fontFamily: 'Handlee-Regular',
+    fontStyle: 'italic',
+  },
+  closeDetailButton: {
+    left: 20,
+    marginTop: 18,
+    alignSelf: 'flex-start',
+    width: 10, // 固定宽度
+    height: 10, // 固定高度
+  },
+  memeImage: {
+    
+    width: '100%', // Adjust the width as needed
+    height: 200, // Adjust the height as needed
+    resizeMode: 'contain', // Ensures the image scales proportionally
+    marginVertical: 10, // Optional: Adds vertical spacing
+  },
+  statusButton1: {
+    left: 20,
+    width: 100, // 固定宽度
+    height: 23, // 固定高度
+
+    fontFamily: 'Handlee-Regular',
+    fontSize: 16,
+    fontStyle: 'italic',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    marginTop: 10,
+    marginBottom: 10,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',         // ✅ 让文字居中
+  },
+  
 });

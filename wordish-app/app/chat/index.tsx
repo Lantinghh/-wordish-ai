@@ -4,11 +4,9 @@ import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, FlatList, K
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import WordClubPanel from '../components/WordClubPanel';
 import { useRouter } from 'expo-router'; // 👈 一定要import！
-import AIReplyBubble from '@/components/AIReplyBubble';
 import MessageWithHighlight from '@/components/MessageWithHighlight';
-import { GREWords } from '../vocab/GREWords';
 
-export default function ChatMainPage() {
+export default function ChatMainPage() {  
   const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState([
     {
@@ -22,9 +20,75 @@ export default function ChatMainPage() {
   const [isWordClubVisible, setWordClubVisible] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
+  // const handleSend = async () => {
+  //   if (!inputText.trim()) return;
+  //   const now = Date.now();
+  //   const userMessage = {
+  //     id: now.toString(),
+  //     text: inputText,
+  //     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  //     sender: 'me',
+  //   };
+
+  //   setMessages((prev) => [...prev, userMessage]);
+  //   setInputText('');
+  
+  //   const loadingMessage = {
+  //     id: (now + 1).toString(),
+  //     text: '',
+  //     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  //     sender: 'loading',
+  //   };
+  
+  //   setMessages((prev) => [...prev, loadingMessage]);
+  //   const startTime = Date.now();
+  
+  //   try {
+  //     const response = await fetch('https://croissant-ai-ms-hackthon.vercel.app/api/chat', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Accept': 'text/plain',
+  //       },
+  //       body: JSON.stringify({
+  //         messages: [
+  //           {
+  //             role: 'user',
+  //             content: userMessage.text,
+  //           }
+  //         ]
+  //       }),
+  //     });
+  
+  //     const aiReply = await response.text();
+  //     const elapsed = Date.now() - startTime;
+  //     const minimumLoadingTime = 2000; // ⭐ 这里调整，比如 800ms，1000ms，看你想要多久
+  //     const delay = Math.max(minimumLoadingTime - elapsed, 0);
+  
+  //     setTimeout(() => {
+  //       const aiMessage = {
+  //         id: loadingMessage.id,
+  //         text: aiReply,
+  //         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  //         sender: 'croissant',
+  //       };
+  
+  //       setMessages((prev) =>
+  //         prev.map((msg) => (msg.id === loadingMessage.id ? aiMessage : msg))
+  //       );
+  
+  //       setTimeout(() => {
+  //         flatListRef.current?.scrollToEnd({ animated: true });
+  //       }, 100);
+  
+  //     }, delay);
+
+  //   } catch (error) {
+  //     console.error('发送到AI失败:', error);
+  //   }
+  // };
   const handleSend = async () => {
     if (!inputText.trim()) return;
-  
     const now = Date.now();
     const userMessage = {
       id: now.toString(),
@@ -44,7 +108,6 @@ export default function ChatMainPage() {
     };
   
     setMessages((prev) => [...prev, loadingMessage]);
-  
     const startTime = Date.now();
   
     try {
@@ -52,7 +115,7 @@ export default function ChatMainPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'text/plain',
+          'Accept': 'application/json',
         },
         body: JSON.stringify({
           messages: [
@@ -64,20 +127,24 @@ export default function ChatMainPage() {
         }),
       });
   
-      const aiReply = await response.text();
-  
+      const aiReply = await response.json(); // 解析 JSON 数据
+      console.log('AI 回复:', aiReply);
       const elapsed = Date.now() - startTime;
-      const minimumLoadingTime = 2000; // ⭐ 这里调整，比如 800ms，1000ms，看你想要多久
+      const minimumLoadingTime = 2000;
       const delay = Math.max(minimumLoadingTime - elapsed, 0);
   
       setTimeout(() => {
         const aiMessage = {
           id: loadingMessage.id,
-          text: aiReply,
+          text: aiReply.txt_msg, // 提取文本消息
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           sender: 'croissant',
-        };
-  
+          highlights: aiReply.tofelWords?.map((word: { word: any; explanation: any; }) => ({
+            word: word.word,
+            meaning: word.explanation,
+          })) || [], // 提取高亮单词
+                  };
+        console.log('AI 消息:', aiMessage);
         setMessages((prev) =>
           prev.map((msg) => (msg.id === loadingMessage.id ? aiMessage : msg))
         );
@@ -92,6 +159,7 @@ export default function ChatMainPage() {
       console.error('发送到AI失败:', error);
     }
   };
+
   const router = useRouter(); // 👈 创建router实例
 
   return (
@@ -120,7 +188,7 @@ export default function ChatMainPage() {
               <Text style={styles.name}>Norman_SpicyCroissant</Text>
               <Text style={styles.subtext}>You’re friends on Wordish</Text>
               <Image source={require('../../assets/home_images/friends.png')} style={styles.friendIcon} />
-              <Text style={styles.hint}>Say hi to your new Wordish friend, Stella.</Text>
+              <Text style={styles.hint}>Say hi to your new Wordish friend, Norman.</Text>
             </View>
           }
           keyExtractor={(item) => item.id}
@@ -147,7 +215,7 @@ export default function ChatMainPage() {
                     {item.sender === 'croissant' ? (
                       <MessageWithHighlight 
                         text={item.text}
-                        highlights={GREWords} // ✅ 自动查单词
+                        highlights={item.highlights || []} // ✅ 自动查单词
                       />
                     ) : (
                       <Text style={styles.messageText}>{item.text}</Text>
@@ -156,12 +224,8 @@ export default function ChatMainPage() {
                 )}
               </View>
             </View>
-          )}
-
-
-          
+          )}   
         />
-
         <View style={[styles.inputBar, { bottom: insets.bottom }]}>
           <TouchableOpacity>
             <Image source={require('../../assets/home_images/input_bar/picture_icon.png')} style={styles.sideIcon} />

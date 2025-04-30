@@ -1,0 +1,59 @@
+{
+    "vocabulary": [
+      {
+        "id": "1",
+        "user_id": "demo-user",
+        "word": "Convoluted",
+        "definition": "Complex and difficult to follow",
+        "category": "GRE Essential",
+        "created_at": "2025-04-30T10:18:44.629Z",
+        "updated_at": "2025-04-30T10:18:44.629Z",
+        "states": [
+          {
+            "id": "state-1",
+            "vocabulary_id": "1",
+            "status": "learning",
+            "history_msg": "Initial state",
+            "created_at": "2025-04-30T10:18:44.629Z"
+          }
+        ]
+      },
+      {
+        "id": "2",
+        "user_id": "demo-user",
+        "word": "Verbose",
+        "definition": "Using more words than needed",
+        "category": "SAT Essential",
+        "created_at": "2025-04-30T10:18:44.629Z",
+        "updated_at": "2025-04-30T10:18:44.629Z",
+        "states": [
+          {
+            "id": "state-2",
+            "vocabulary_id": "2",
+            "status": "Stranger",
+            "history_msg": "Initial state",
+            "created_at": "2025-04-30T10:18:44.629Z"
+          }
+        ]
+      },
+      {
+        "id": "3",
+        "user_id": "demo-user",
+        "word": "Iambic",
+        "definition": "A poetic meter",
+        "category": "AP Literature",
+        "created_at": "2025-04-30T10:18:44.629Z",
+        "updated_at": "2025-04-30T10:18:44.629Z",
+        "states": [
+          {
+            "id": "state-3",
+            "vocabulary_id": "3",
+            "status": "Stranger",
+            "history_msg": "Initial state",
+            "created_at": "2025-04-30T10:18:44.629Z"
+          }
+        ]
+      }
+    ]
+  }
+  
