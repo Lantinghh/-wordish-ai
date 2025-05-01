@@ -81,7 +81,7 @@ npx expo run:android
 ```
 
 ## Scan QRCode to Try it！
-<img width="497" alt="image" src="https://github.com/user-attachments/assets/3938d3d8-0fad-45ba-ad9d-5ebdc9ae361e" />
+<img width="615" alt="image" src="https://github.com/user-attachments/assets/a15376fe-1ff7-4da2-aba4-e3e1d7535e3c" />
 
 
 ## Usage
