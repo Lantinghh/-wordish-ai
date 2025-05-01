@@ -79,7 +79,7 @@ npx expo run:ios
 npx expo run:android
 ```
 
-## Try it！
+## Scan QRCode to Try it！
 <img width="497" alt="image" src="https://github.com/user-attachments/assets/3938d3d8-0fad-45ba-ad9d-5ebdc9ae361e" />
 
 
