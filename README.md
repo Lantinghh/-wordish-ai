@@ -23,6 +23,7 @@
 ## Project Structure
 
 
+```
 wordish-ai/
 ├── assets/                  # Static assets (images, fonts, etc.)
 │   ├── fonts/              # Custom fonts
