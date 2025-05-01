@@ -38,6 +38,8 @@ wordish-ai/
 ├── package.json            # Project dependencies
 ├── react-native.config.js  # Font linking configuration
 ```
+## Try it！
+<img width="497" alt="image" src="https://github.com/user-attachments/assets/3938d3d8-0fad-45ba-ad9d-5ebdc9ae361e" />
 
 ## Getting Started
 
